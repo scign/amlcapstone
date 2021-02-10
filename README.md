@@ -91,11 +91,10 @@ print("prediction:", resp.text)
 ![Endpoint demo](assets/deployed_endpoint_response.png)
 
 ## Screen Recording
-*TODO* Provide a link to a screen recording of the project in action. Remember that the screencast should demonstrate:
-- A working model
+A screencast showing the following is published on [YouTube](https://youtu.be/1U_jEPqlKUI). I forgot to zoom in on the notebooks so as long as you review the screencast in fullscreen mode, and select 1080p quality, the content will be clear. The video is uploaded in 1080p.
+- The working model
 - Demo of the deployed model
 - Demo of a sample request sent to the endpoint and its response
-
 
 ## Improvements
 ### Imbalance
