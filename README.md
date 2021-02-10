@@ -21,7 +21,7 @@ We will be using all features except `quality`, to try and predict wine quality.
 ### Access
 The data is made accessible through a public link to the UCI data archive.
 * For AutoML we create a dataset using the dataset URL and register the dataset in the workspace. We then pull the dataset into a pandas dataframe and split the dataset into train and test dataframes. The train dataset is exported to a CSV file, uploaded to the default datastore, and a DataSet object is constructed that points to the file in the datastore. This is done so that we end up with a pointer that we can pass to the AutoML engine, which is good practice.
-* For Hyperdrive we access the data directly from the `train.py` script, ultimately getting a dataframe with the contents, again splitting that into train and test segments, and using the train dataset to build the model.
+* For Hyperdrive we access the data directly from the `train.py` script, again using the URL above to download the dataset into a dataframe, again splitting that into train and test segments, and using the training data to build the model.
 
 ## Automated ML
 Given that this is a regression task, we chose the normalized root mean squared error (NRMSE) as the primary metric to optimize. This calculates the mean difference between sample targets and predicted values, as a proportion of the target range. We are looking to minimize this value, i.e. look for the model with the smallest overall difference between predicted value and target value.
