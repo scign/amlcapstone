@@ -98,11 +98,15 @@ A screencast showing the following is published on [YouTube](https://youtu.be/1U
 
 ## Improvements
 ### Imbalance
-![Imbalance](assets/imbalance.png)
+<div style="bg-white">
+  <img src="assets/imbalance.png" />
+</div>
 
 Over 80% of the samples in the dataset are given a quality rating of 5 or 6 and since the range is from 3 to 8, the bulk of the samples is centrally situated. The large central data mass drastically reduces the influence of peripheral samples, meaning that a large range of models could fit the data with a high perceived accuracy. This is apparent when looking at the residual plot - the model has failed to weight samples with quality at the ends of the range sufficiently, to identify the relationship correctly.
 
-![Residual](assets/residual.png)
+<div style="bg-white">
+  <img src="assets/residual.png" />
+</div>
 
 Three things that could mitigate this are:
 1. Reviewing the model test samples to check whether the model accurately fit the peripheral samples;
