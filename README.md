@@ -1,29 +1,56 @@
-# Wine quality
+# Winemaking used to be an art. AI has turned it into a science.
 
-We use AutoML to explore model types, and Hyperdrive to explore model hyperparameters, to build a model that can predict subjective wine 'quality' from measurable physicochemical properties such as pH and sulfate content.
+You can't directly measure the "quality" of a good wine since quality is a subjective measure. However this quality is based on a number of properties of the wine, many of them physical and chemical in nature. Therefore you can measure those properties and model how those properties correlate to the subjective "quality".
+
+We looked at how AutoML and Hyperdrive assist with exploring different model types and hyperparameters, to find a model that can predict this subjective wine "quality" from the measurable physicochemical properties such as pH and sulfate content.
+
+Both methods produced models with a small Normalized Root Mean Squared Error (NRMSE), interpreted as just 12-13% of the target variable range which is apparently pretty good. The AutoML model outperformed the Hyperdrive model slightly. We deployed the AutoML model and validated that the model was deployed by sending an HTTP request to the model endpoint and receiving a valid response.
+
+Suggestions for improvements were identified and discussed below.
 
 ## Dataset
 
 ### Overview
 We will be using the Wine Quality dataset made accessible [here](https://archive.ics.uci.edu/ml/datasets/wine+quality).
 
-The dataset contains the physicochemical properties of 1599 red wine samples. The data includes, in column order: `fixed acidity`, `volatile acidity`, `citric acid`, `residual sugar`, `chlorides`, `free sulfur dioxide`, `total sulfur dioxide`, `density`, `pH`, `sulphates`, `alcohol`, and the final column is the target variable, `quality` (score between 0 and 10).
+The dataset contains the physicochemical properties of 1599 red wine samples. The data includes, in column order: `fixed acidity`, `volatile acidity`, `citric acid`, `residual sugar`, `chlorides`, `free sulfur dioxide`, `total sulfur dioxide`, `density`, `pH`, `sulphates`, `alcohol`. The data also includes, as the final column, the target variable `quality` (score between 0 and 10) which was human-derived.
 
 ### Task
-We will be using all features except `quality`, to try and predict wine quality. All the features are numerical and continuous, which allows us to hypothesize whether a regression model may be able to score quality given the input features.
+We will be using all features except `quality`, to try and predict wine quality. The original research treated this as a classification task, however since all the features are numerical and ordered, we hypothesize whether a regression model may be able to predict quality given the input features.
 
 ### Access
-The data is made accessble through a public link to the UCI data archive.
+The data is made accessible through a public link to the UCI data archive.
+* For AutoML we create a dataset using the dataset URL and register the dataset in the workspace. We then pull the dataset into a pandas dataframe and split the dataset into train and test dataframes. The train dataset is exported to a CSV file, uploaded to the default datastore, and a DataSet object is constructed that points to the file in the datastore. This is done so that we end up with a pointer that we can pass to the AutoML engine, which is good practice.
+* For Hyperdrive we access the data directly from the `train.py` script, ultimately getting a dataframe with the contents, again splitting that into train and test segments, and using the train dataset to build the model.
 
 ## Automated ML
-Given that this is a regression task, I chose the normalized root mean squared error (NRMSE) as the primary metric to optimize. This calculates the mean difference between sample targets and predicted values, as a proportion of the target range. We are looking to minimize this value, i.e. look for the model with the smallest overall difference between predicted value and target value.
+Given that this is a regression task, we chose the normalized root mean squared error (NRMSE) as the primary metric to optimize. This calculates the mean difference between sample targets and predicted values, as a proportion of the target range. We are looking to minimize this value, i.e. look for the model with the smallest overall difference between predicted value and target value.
+
+The following configuration settings were used:
+Setting | Value | Comments
+- | - | -
+experiment_timeout_minutes | 15 | Modelling this small dataset is very quick and we should be able to train a significant number of models in this time.
+max_concurrent_iterations | 5 | Ensuring that we make good use of the compute instance nodes
+n_cross_validations | 5 | Cross validation ensures that we achieve sufficient coverage of the dataset
+primary_metric | normalized_root_mean_squared_error | This is how we will judge how well the model fits the data
+
 
 ### Results
+The AutoML Run is shown below.
+
 ![AutoML run details](assets/automl-run.png)
 
 The last two models trained are the StackEnsemble and VotingEnsemble. As usual these are the best two models in the group.
 
+These are the best model identified by the AutoML run.
+
 ![AutoML best models](assets/automl-best-models.png)
+
+The best model:
+
+![AutoML best model](assets/automl-best-model.png)
+
+Components and parameters of the best model:
 
 ![Best model (1 of 2)](assets/best_model1.png)
 ![Best model (2 of 2)](assets/best_model2.png)
@@ -52,8 +79,12 @@ The Bandit early stopping policy with a 20% slack ratio terminates runs if the p
 ### Results
 ![Hyperdrive run details](assets/hyperdrive-run.png)
 
-As expected, the lowest `alpha` and `l1_ratio` values produced the model with the lowest error. The model with the lowest NMRSE was trained with `alpha`=0.0344 and `l1_ratio`=0.0714.
+The scatter plot on the right shows the 2d parameter space, with the hue as the NMRSE. Darker is better. The plot gets darker towards the origin. As expected, the lowest `alpha` and `l1_ratio` values produced the model with the lowest error.
+
 ![Hyperdrive best models](assets/hyperdrive-best-models.png)
+
+The model with the lowest NMRSE was trained with `alpha`=0.0344 and `l1_ratio`=0.0714.
+
 ![Hyperdrive best model](assets/hyperdrive-best-model.png)
 
 ### Best model between Hyperdrive and AutoML
@@ -89,6 +120,10 @@ print("label:", y_test)
 print("prediction:", resp.text)
 ```
 ![Endpoint demo](assets/deployed_endpoint_response.png)
+
+To ensure consistency of the environment if this model needed to be deployed again, two files, `azureml_environment.json` and `conda_dependencies.yml` are made available through the Environment object constructed for deployment. The files representing the environment used here are at the following links:
+* [azureml_environment.json](assets/azureml_environment.json)
+* [conda_dependencies.yml](assets/conda_dependencies.yml)
 
 ## Screen Recording
 A screencast showing the following is published on [YouTube](https://youtu.be/1U_jEPqlKUI). I forgot to zoom in on the notebooks so as long as you review the screencast in fullscreen mode, and select 1080p quality, the content will be clear. The video is uploaded in 1080p.
