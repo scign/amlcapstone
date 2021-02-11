@@ -27,8 +27,9 @@ The data is made accessible through a public link to the UCI data archive.
 Given that this is a regression task, we chose the normalized root mean squared error (NRMSE) as the primary metric to optimize. This calculates the mean difference between sample targets and predicted values, as a proportion of the target range. We are looking to minimize this value, i.e. look for the model with the smallest overall difference between predicted value and target value.
 
 The following configuration settings were used:
+
 Setting | Value | Comments
-- | - | -
+--- | --- | ---
 experiment_timeout_minutes | 15 | Modelling this small dataset is very quick and we should be able to train a significant number of models in this time.
 max_concurrent_iterations | 5 | Ensuring that we make good use of the compute instance nodes
 n_cross_validations | 5 | Cross validation ensures that we achieve sufficient coverage of the dataset
@@ -143,7 +144,7 @@ Over 80% of the samples in the dataset are given a quality rating of 5 or 6 and 
   <img src="assets/residual.png" />
 </div>
 
-Three things that could mitigate this are:
+Some things that could mitigate this are:
 1. Reviewing the model test samples to check whether the model accurately fit the peripheral samples;
 1. Reducing the number of samples with a 5/6 rating to reduce the influence of the central mass and allow the model to fit the peripheral data better;
 1. Undersampling from quality ratings 5 and 6 or using methods such as SMOTE to oversample the other quality groups; or
